@@ -22,7 +22,7 @@ using namespace std;
 using std::string;
 using std::vector;
 
-#define EPS 0.00001
+constexpr auto epsilon = 0.00001;
 
 void ParticleFilter::init(double x, double y, double theta, double std[]) {
   /**
@@ -59,7 +59,6 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
     particles.push_back(particle);
 	}
 
-  // The filter is now initialized.
   is_initialized = true;
 
 }
@@ -74,25 +73,19 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
    *  http://www.cplusplus.com/reference/random/default_random_engine/
    */
 
-   // Extracting standard deviations
-	double std_x = std_pos[0];
-	double std_y = std_pos[1];
-	double std_theta = std_pos[2];
+	// Create normal distributions
+	normal_distribution<double> dist_x(0, std_pos[0]);
+	normal_distribution<double> dist_y(0, std_pos[1]);
+	normal_distribution<double> dist_theta(0, std_pos[2]);
 
-	// Creating normal distributions
-	normal_distribution<double> dist_x(0, std_x);
-	normal_distribution<double> dist_y(0, std_y);
-	normal_distribution<double> dist_theta(0, std_theta);
-
-	// Calculate new state.
+	// Calculate new states.
 	for (int i = 0; i < num_particles; i++) {
 
 		double theta = particles[i].theta;
 
-		if (fabs(yaw_rate) < EPS) { // When yaw is not changing.
+		if (fabs(yaw_rate) < epsilon) {
 			particles[i].x += velocity * delta_t * cos(theta);
 			particles[i].y += velocity * delta_t * sin(theta);
-			// yaw continue to be the same.
 		}
 		else {
 			particles[i].x += velocity / yaw_rate * (sin(theta + yaw_rate * delta_t) - sin(theta));
@@ -100,7 +93,7 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
 			particles[i].theta += yaw_rate * delta_t;
 		}
 
-		// Adding noise.
+		// Add noise.
 		particles[i].x += dist_x(gen);
 		particles[i].y += dist_y(gen);
 		particles[i].theta += dist_theta(gen);
@@ -224,7 +217,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 
 			double weight = (1 / (2 * M_PI * stdLandmarkRange * stdLandmarkBearing)) * exp(-(dX * dX / (2 * stdLandmarkRange * stdLandmarkRange) + (dY * dY / (2 * stdLandmarkBearing * stdLandmarkBearing))));
 			if (weight == 0) {
-				particles[i].weight *= EPS;
+				particles[i].weight *= epsilon;
 			}
 			else {
 				particles[i].weight *= weight;
