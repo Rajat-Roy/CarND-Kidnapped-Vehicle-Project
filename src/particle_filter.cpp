@@ -41,17 +41,12 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
   // Initializing the number of particles
   num_particles = 100;
 
-  // Extracting standard deviations
-  double std_x = std[0];
-  double std_y = std[1];
-  double std_theta = std[2];
+  // Create normal distributions
+  normal_distribution<double> dist_x(x, std[0]);
+  normal_distribution<double> dist_y(y, std[1]);
+  normal_distribution<double> dist_theta(theta, std[2]);
 
-  // Creating normal distributions
-  normal_distribution<double> dist_x(x, std_x);
-  normal_distribution<double> dist_y(y, std_y);
-  normal_distribution<double> dist_theta(theta, std_theta);
-
-  // Generate particles with normal distribution with mean on GPS values.
+  // Generate particles from GPS values.
   for (int i = 0; i < num_particles; i++) {
 
     Particle particle;
