@@ -11,7 +11,9 @@
 
 #include <string>
 #include <vector>
+#include <random>
 #include "helper_functions.h"
+
 
 struct Particle {
   int id;
@@ -33,7 +35,7 @@ class ParticleFilter {
 
 	 std::default_random_engine gen;
 
-  ParticleFilter() : num_particles(0), is_initialized(false) {}
+ParticleFilter() : num_particles(0), is_initialized(false) {}
 
   // Destructor
   ~ParticleFilter() {}
