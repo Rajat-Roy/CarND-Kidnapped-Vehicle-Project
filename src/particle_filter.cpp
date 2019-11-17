@@ -113,24 +113,22 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
 	unsigned int nObservations = observations.size();
 	unsigned int nPredictions = predicted.size();
 
-	for (unsigned int i = 0; i < nObservations; i++) { // For each observation
+	for (unsigned int i = 0; i < nObservations; i++) {
 
-	  // Initialize min distance as a really big number.
-		double minDistance = numeric_limits<double>::max();
+	  // Initialize min Dist.
+		double minDist = numeric_limits<double>::max();
 
-		// Initialize the found map in something not possible.
 		int mapId = -1;
 
 		for (unsigned j = 0; j < nPredictions; j++) { // For each predition.
 
-			double xDistance = observations[i].x - predicted[j].x;
-			double yDistance = observations[i].y - predicted[j].y;
+			double xDist = observations[i].x - predicted[j].x;
+			double yDist = observations[i].y - predicted[j].y;
 
-			double distance = xDistance * xDistance + yDistance * yDistance;
+			double dist = xDist * xDist + yDist * yDist;
 
-			// If the "distance" is less than min, stored the id and update min.
-			if (distance < minDistance) {
-				minDistance = distance;
+			if (dist < minDist) {
+				minDist = dist;
 				mapId = predicted[j].id;
 			}
 		}
@@ -164,7 +162,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 		double x = particles[i].x;
 		double y = particles[i].y;
 		double theta = particles[i].theta;
-		// Find landmarks in particle's range.
+
 		double sensor_range_2 = sensor_range * sensor_range;
 		vector<LandmarkObs> inRangeLandmarks;
 		for (unsigned int j = 0; j < map_landmarks.landmark_list.size(); j++) {
@@ -178,7 +176,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 			}
 		}
 
-		// Transform observation coordinates.
+		// Transform coordinates.
 		vector<LandmarkObs> mappedObservations;
 		for (unsigned int j = 0; j < observations.size(); j++) {
 			double xx = cos(theta) * observations[j].x - sin(theta) * observations[j].y + x;
@@ -186,11 +184,12 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 			mappedObservations.push_back(LandmarkObs{ observations[j].id, xx, yy });
 		}
 
-		// Observation association to landmark.
+
 		dataAssociation(inRangeLandmarks, mappedObservations);
 
-		// Reseting weight.
+
 		particles[i].weight = 1.0;
+
 		// Calculate weights.
 		for (unsigned int j = 0; j < mappedObservations.size(); j++) {
 			double observationX = mappedObservations[j].x;
@@ -211,7 +210,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 				k++;
 			}
 
-			// Calculating weight.
+			// Calculate weight.
 			double dX = observationX - landmarkX;
 			double dY = observationY - landmarkY;
 
@@ -243,16 +242,16 @@ void ParticleFilter::resample() {
 		}
 	}
 
-	// Creating distributions.
+	// Create distributions.
 	uniform_real_distribution<double> distDouble(0.0, maxWeight);
 	uniform_int_distribution<int> distInt(0, num_particles - 1);
 
-	// Generating index.
+	// Generate index.
 	int index = distInt(gen);
 
 	double beta = 0.0;
 
-	// the wheel
+	// wheel sampling technique
 	vector<Particle> resampledParticles;
 	for (int i = 0; i < num_particles; i++) {
 		beta += distDouble(gen) * 2.0;
