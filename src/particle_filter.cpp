@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "helper_functions.h"
+using namespace std;
 
 using std::string;
 using std::vector;
