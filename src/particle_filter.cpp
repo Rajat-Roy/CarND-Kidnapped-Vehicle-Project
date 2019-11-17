@@ -22,6 +22,8 @@ using namespace std;
 using std::string;
 using std::vector;
 
+#define EPS 0.00001
+
 void ParticleFilter::init(double x, double y, double theta, double std[]) {
   /**
    * TODO: Set the number of particles. Initialize all particles to 
@@ -77,6 +79,37 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
    *  http://www.cplusplus.com/reference/random/default_random_engine/
    */
 
+   // Extracting standard deviations
+	double std_x = std_pos[0];
+	double std_y = std_pos[1];
+	double std_theta = std_pos[2];
+
+	// Creating normal distributions
+	normal_distribution<double> dist_x(0, std_x);
+	normal_distribution<double> dist_y(0, std_y);
+	normal_distribution<double> dist_theta(0, std_theta);
+
+	// Calculate new state.
+	for (int i = 0; i < num_particles; i++) {
+
+		double theta = particles[i].theta;
+
+		if (fabs(yaw_rate) < EPS) { // When yaw is not changing.
+			particles[i].x += velocity * delta_t * cos(theta);
+			particles[i].y += velocity * delta_t * sin(theta);
+			// yaw continue to be the same.
+		}
+		else {
+			particles[i].x += velocity / yaw_rate * (sin(theta + yaw_rate * delta_t) - sin(theta));
+			particles[i].y += velocity / yaw_rate * (cos(theta) - cos(theta + yaw_rate * delta_t));
+			particles[i].theta += yaw_rate * delta_t;
+		}
+
+		// Adding noise.
+		particles[i].x += dist_x(gen);
+		particles[i].y += dist_y(gen);
+		particles[i].theta += dist_theta(gen);
+	}
 }
 
 void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted, 
